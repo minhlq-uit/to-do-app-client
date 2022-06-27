@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background: rgb(162, 170, 247);
+  background-image: linear-gradient(to right, #c1e1dc , #fdd475);
+  font-size: 16px;
+  font-weight: 700;
+}
+.heading {
+  font-size: 3rem;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
