@@ -1,6 +1,8 @@
 <template>
   <div class="mb-2 todo-input">
-    <span class="round-custom" @click="addNewTaskDetail(id, nameTaskDetail, accessToken)"
+    <span
+      class="round-custom"
+      @click="addNewTaskDetail(c, nameTaskDetail, accessToken)"
       ><i class="fa-solid fa-plus"></i
     ></span>
     <input
@@ -19,28 +21,26 @@ import { ref } from "vue";
 import { useStore } from "vuex";
 export default {
   props: ["id"],
-
-  setup(props, { emit }) {
-    const store = useStore();
-    const accessToken = store.state.user.accessToken;
-    const nameTaskDetail = ref(null);
-
-    const addNewTaskDetail = async (id, nameTaskDetail, accessToken) => {
-      console.log("nametaskdetail", nameTaskDetail.value);
+  data() {
+    return {
+      accessToken: this.$store.state.user.accessToken,
+      nameTaskDetail: null,
+    };
+  },
+  methods: {
+    async addNewTaskDetail(id, nameTaskDetail, accessToken) {
       try {
-        await store.dispatch("createTaskDetail", {
+        await this.$store.dispatch("createTaskDetail", {
           id,
           nameTaskDetail,
           accessToken,
         });
-        emit("addTaskDetailSuccess");
-        nameTaskDetail.value = ''
-        console.log('nametaskdetail', nameTaskDetail.value)
+        this.$emit("addTaskDetailSuccess");
+        nameTaskDetail = "";
       } catch (err) {
         console.log("err", err.message);
       }
-    };
-    return { nameTaskDetail, addNewTaskDetail, accessToken };
+    },
   },
 };
 </script>

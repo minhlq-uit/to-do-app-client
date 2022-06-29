@@ -58,32 +58,28 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
 
 export default {
-  setup() {
-    const store = useStore()
-    const router = useRouter()
-    const name = ref(null);
-    const email = ref(null);
-    const password = ref(null);
-
-    const submitRegisterForm = async () => {
+  data() {
+    return {
+      name: null,
+      email: null,
+      password: null
+    }
+  },
+  methods: {
+    async submitRegisterForm() {
       try {
-        await store.dispatch('register', {
-          email: email.value,
-          password: password.value,
-          name: name.value
+        await this.$store.dispatch('register', {
+          email: this.email,
+          password: this.password,
+          name: this.name
         })
-        router.push('/auth/login')
+        this.$router.push('/auth/login')
       } catch (err) {
         console.log('err', err.message)
       }
-    };
-
-    return { name, email, password, submitRegisterForm}
+    }
   },
 };
 </script>

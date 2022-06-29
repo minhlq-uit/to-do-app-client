@@ -29,20 +29,23 @@
       :class="{ active: isEditting && !isCompleted }"
       @click="closeEditting"
     ></i>
-    <i class="fa-solid fa-x btn-delete" :class="{ active: isCompleted }" @click="deleteTaskDetail(id, accessToken)"></i>
+    <i
+      class="fa-solid fa-x btn-delete"
+      :class="{ active: isCompleted }"
+      @click="deleteTaskDetail(id, accessToken)"
+    ></i>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
-import { useStore } from "vuex";
-import { watch } from "vue";
 
 export default {
   props: ["nameTaskDetail", "state", "id", "filterActive"],
   data() {
     return {
-      // isCompleted: this.state === "Done",
+      accessToken: this.$store.state.user.accessToken,
+      isCompleted: this.state === "Done",
+      newNameTask: this.nameTaskDetail,
       isEditting: false,
     };
   },
@@ -55,62 +58,50 @@ export default {
       this.isEditting = false;
       // this.updateNameTask(this.id, this.newNameTask, this.state, this.accessToken)
     },
-  },
-  setup(props, { emit }) {
-    const store = useStore();
-    const accessToken = store.state.user.accessToken;
-    const isCompleted = ref(props.state === "Done");
-    const newNameTask = ref(props.nameTaskDetail)
-    const toogleCompleted = async (id, nameTaskDetail, state, accessToken) => {
+    async toogleCompleted(id, nameTaskDetail, state, accessToken) {
       try {
         state = state === "ToDo" ? "Done" : "ToDo";
-        await store.dispatch("updateTaskDetailById", {
+        await this.$store.dispatch("updateTaskDetailById", {
           id,
           nameTaskDetail,
           state,
           accessToken,
         });
-        emit("updateSuccess");
-        isCompleted.value = props.state;
+        this.$emit("updateSuccess");
+        this.isCompleted = state === "Done";
       } catch (err) {
         console.log("err", err.message);
       }
-    };
-    const updateNameTask = async (id, nameTaskDetail, state, accessToken) => {
+    },
+    async updateNameTask(id, nameTaskDetail, state, accessToken) {
       try {
-        // state = state === "ToDo" ? "Done" : "ToDo";
-        await store.dispatch("updateTaskDetailById", {
+        await this.store.dispatch("updateTaskDetailById", {
           id,
           nameTaskDetail,
           state,
           accessToken,
         });
-        emit("updateSuccess");
+        this.$emit("updateSuccess");
         // isCompleted.value = props.state;
       } catch (err) {
         console.log("err", err.message);
       }
-    };
-
-    watch(
-      () => props.state,
-      () => {
-        console.log("props state changed");
-        isCompleted.value = props.state === "Done";
-      }
-    );
-
-    const deleteTaskDetail = async (id, accessToken) => {
+    },
+    async deleteTaskDetail(id, accessToken) {
       try {
-        await store.dispatch("deleteTaskDetailById", {id, accessToken})
-        emit("updateSuccess")
-      } catch(err) {
-        console.log('err', err.message)
+        await this.$store.dispatch("deleteTaskDetailById", { id, accessToken });
+        this.$emit("updateSuccess");
+      } catch (err) {
+        console.log("err", err.message);
       }
     }
-
-    return { newNameTask,toogleCompleted, accessToken, isCompleted, deleteTaskDetail, updateNameTask };
   },
+  watch: {
+    state() {
+      this.isCompleted = this.state === "Done";
+    },
+  },
+
 };
 </script>
 

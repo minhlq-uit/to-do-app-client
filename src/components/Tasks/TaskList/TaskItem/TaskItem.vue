@@ -25,31 +25,23 @@
 </template>
 
 <script>
-import { formatDate } from "@/utils/formatDate";
-import { useStore } from "vuex";
 export default {
   props: ["nameTask", "desTask", "deadline", "id"],
-  computed: {
-    formatDealine(deadline) {
-      console.log("deadline", deadline);
-      return formatDate(deadline);
-    },
+  data() {
+    return {
+      accessToken: this.$store.state.user.accessToken
+    }
   },
-  setup(props, { emit }) {
-    const store = useStore()
-    const accessToken = store.state.user.accessToken
-    const deleteTaskById = async (id, accessToken) => {
+  methods: {
+    async deleteTaskById(id, accessToken) {
       try {
-        await store.dispatch("deleteTaskById", {id, accessToken})
-        emit('deleteTaskSuccess')
+        await this.$store.dispatch("deleteTaskById", {id, accessToken})
+        this.$emit('deleteTaskSuccess')
       } catch (err) {
         console.log('err', err.message)
       }
     }
-
-
-    return { deleteTaskById, accessToken}
-  }
+  },
 };
 </script>
 

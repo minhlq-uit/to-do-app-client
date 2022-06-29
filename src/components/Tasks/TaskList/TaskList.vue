@@ -115,54 +115,42 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useStore } from "vuex";
 import TaskItem from "./TaskItem/TaskItem.vue";
 export default {
   props: ["tasks"],
   components: {
     TaskItem,
   },
-  setup(props, { emit }) {
-    const store = useStore();
-    const accessToken = store.state.user.accessToken
-    const showModal = ref(false);
-    const nameTask = ref(null);
-    const desTask = ref(null);
-    const deadline = ref(null);
-
-    const toggleModal = () => {
-      showModal.value = !showModal.value;
-    };
-
-    const handleSubmitNewTask = async () => {
-      toggleModal();
-      console.log('deadline', deadline.value)
+  data() {
+    return {
+      accessToken: this.$store.state.user.accessToken,
+      nameTask: null,
+      desTask: null,
+      deadline: null,
+      showModal: false
+    }
+  },
+  methods: {
+    toggleModal() {
+      this.showModal = !this.showModal;
+    },
+    async handleSubmitNewTask() {
+      this.toggleModal()
       try {
-        await store.dispatch("createTaskByCurrentUser", {
-          nameTask: nameTask.value,
-          description: desTask.value,
-          deadline: deadline.value + ':00.00Z',
-          accessToken,
+        await this.$store.dispatch("createTaskByCurrentUser", {
+          nameTask: this.nameTask,
+          description: this.desTask,
+          deadline: this.deadline + ':00.00Z',
+          accessToken: this.accessToken,
         });
-        emit('addTaskSuccess')
+        this.$emit('addTaskSuccess')
       } catch (err) {
         console.log("err", err.message);
       }
-    };
-    const deleteTaskSuccess = () => {
-      emit('deleteTaskSuccess')
+    },
+    deleteTaskSuccess() {
+      this.$emit('deleteTaskSuccess')
     }
-
-    return {
-      showModal,
-      nameTask,
-      desTask,
-      deadline,
-      handleSubmitNewTask,
-      toggleModal,
-      deleteTaskSuccess
-    };
   },
 };
 </script>

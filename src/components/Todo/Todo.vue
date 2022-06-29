@@ -18,90 +18,64 @@
 import TodoInput from "./TodoInput/TodoInput.vue";
 import TodoList from "./TodoList/TodoList.vue";
 import TodoFooter from "./TodoFooter/TodoFooter.vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { useRoute } from "vue-router";
-import { ref, watch, watchEffect } from "vue";
 export default {
   components: {
     TodoInput,
     TodoList,
     TodoFooter,
   },
-
-  setup() {
-    const store = useStore();
-    const router = useRouter();
-    const route = useRoute();
-    const accessToken = store.state.user.accessToken;
-    const taskDetails = ref(null);
-
-    const id = route.params.id;
-
-    const getAllTasksDetailByTask = async (id, accessToken) => {
+  data() {
+    return {
+      accessToken: this.$store.state.user.accessToken,
+      taskDetails: null,
+      id: this.$route.params.id,
+      filterActive: "all",
+      countTaskDetail: 0,
+    };
+  },
+  methods: {
+    async getAllTasksDetailByTask(id, accessToken) {
       try {
-        await store.dispatch("getAllTasksDetailByTask", { id, accessToken });
-        taskDetails.value = store.state.taskDetails.taskDetailList;
+        await this.$store.dispatch("getAllTasksDetailByTask", {
+          id,
+          accessToken,
+        });
+        this.taskDetails = this.$store.state.taskDetails.taskDetailList;
       } catch (err) {
         console.log(err.message);
       }
-    };
-    watch(taskDetails, () => {
-      console.log("taskDetails", taskDetails.value);
-    });
-    watchEffect(() => getAllTasksDetailByTask(id, accessToken));
-
-    const addTaskDetailSuccess = () => {
-      getAllTasksDetailByTask(id, accessToken);
-    };
-
-    const filterActive = ref("all");
-    const countTaskDetail = ref(
-      taskDetails.value ? taskDetails.value.length : 0
-    );
-
-    watch(
-      () => taskDetails.value,
-      () => {
-        if (filterActive.value === "all") {
-          countTaskDetail.value = taskDetails.value.length;
-        }
+    },
+    addTaskDetailSuccess() {
+      this.getAllTasksDetailByTask(this.id, this.accessToken);
+    },
+    changeFilter(value) {
+      this.filterActive = value;
+    },
+    updateSuccess() {
+      this.getAllTasksDetailByTask(this.id, this.accessToken);
+    },
+  },
+  watch: {
+    filterActive() {
+      if (this.filterActive === "all") {
+        this.countTaskDetail = this.taskDetails.length;
+      } else {
+        this.countTaskDetail = 0;
+        this.taskDetails.forEach((item) => {
+          if (item.state === this.filterActive) {
+            this.countTaskDetail++;
+          }
+        });
       }
-    );
-
-    watch(
-      () => filterActive.value,
-      () => {
-        if (filterActive.value === "all") {
-          countTaskDetail.value = taskDetails.value.length;
-        } else {
-          countTaskDetail.value = 0;
-          taskDetails.value.forEach((item) => {
-            if (item.state === filterActive.value) {
-              countTaskDetail.value++;
-            }
-          });
-        }
+    },
+    taskDetails() {
+      if (this.filterActive === "all") {
+        this.countTaskDetail = this.taskDetails.length;
       }
-    );
-
-    const changeFilter = (value) => {
-      filterActive.value = value;
-    };
-
-    const updateSuccess = () => {
-      getAllTasksDetailByTask(id, accessToken);
-    };
-
-    return {
-      taskDetails,
-      addTaskDetailSuccess,
-      id,
-      filterActive,
-      changeFilter,
-      updateSuccess,
-      countTaskDetail,
-    };
+    },
+  },
+  created() {
+    this.getAllTasksDetailByTask(this.id, this.accessToken);
   },
 };
 </script>
